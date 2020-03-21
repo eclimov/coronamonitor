@@ -20,9 +20,9 @@ sched.start()
 app = Flask(__name__)
 
 if __name__ == "__main__":
-    app.run()
-    channel.telegram_send_advice()
+    # app.run()
+    # channel.telegram_send_advice()
     # channel.telegram_send_poll()
-    # channel.telegram_send_image()
+    channel.telegram_send_image()
     # channel.telegram_send_statistics_summary()
     # channel.telegram_send_statistics_by_countries()
