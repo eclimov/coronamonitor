@@ -14,7 +14,7 @@ sched.add_job(channel.telegram_send_advice, 'cron', hour='5-20', minute='1')
 sched.add_job(channel.telegram_send_image, 'cron', hour='6-21/2', minute='32')
 sched.add_job(channel.telegram_send_poll, 'cron', hour='5-20/5', minute='25')
 sched.add_job(channel.telegram_send_statistics_summary, 'cron', hour='7', minute='35')
-sched.add_job(channel.telegram_send_statistics_by_countries, 'cron', hour='6,19', minute='55')
+sched.add_job(channel.telegram_send_statistics_by_countries, 'cron', hour='6,12,20', minute='55')
 sched.start()
 
 app = Flask(__name__)
