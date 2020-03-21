@@ -2,10 +2,11 @@ from src.Channel import Channel
 from flask import Flask
 from apscheduler.schedulers.background import BackgroundScheduler
 import sys
+from pytz import utc
 
 sys.path.append("../")
 
-sched = BackgroundScheduler()  # Scheduler object
+sched = BackgroundScheduler(timezone=utc)  # Scheduler object
 sched.start()
 
 channel = Channel()
