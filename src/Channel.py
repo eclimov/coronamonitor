@@ -46,7 +46,7 @@ class Channel:
         print(result)
 
     def telegram_send_image(self):
-        images_path = 'assets'
+        images_path = '../assets'
         images = [f for f in listdir(images_path) if isfile(join(images_path, f))]
 
         button_menu = build_menu(

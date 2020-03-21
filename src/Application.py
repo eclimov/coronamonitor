@@ -1,4 +1,4 @@
-from Channel import Channel
+from src.Channel import Channel
 from flask import Flask
 from apscheduler.schedulers.background import BackgroundScheduler
 import sys
