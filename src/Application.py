@@ -6,19 +6,23 @@ from pytz import utc
 
 sys.path.append("../")
 
-sched = BackgroundScheduler(timezone=utc)  # Scheduler object
-sched.start()
-
 channel = Channel()
-sched = BackgroundScheduler(daemon=True)
-sched.add_job(channel.telegram_send_advice, 'interval', minutes=62)
-sched.add_job(channel.telegram_send_poll, 'interval', minutes=249)
-sched.add_job(channel.telegram_send_image, 'interval', minutes=85)
-sched.add_job(channel.telegram_send_statistics_summary, 'interval', minutes=720)
-sched.add_job(channel.telegram_send_statistics_by_countries, 'interval', minutes=1440)
+# https://medium.com/better-programming/introduction-to-apscheduler-86337f3bb4a6
+sched = BackgroundScheduler(daemon=True, timezone=utc)  # Scheduler object
+
+sched.add_job(channel.telegram_send_advice, 'cron', hour='*', minute='1')
+sched.add_job(channel.telegram_send_image, 'cron', hour='*/2', minute='15')
+sched.add_job(channel.telegram_send_poll, 'cron', hour='*/5', minute='25')
+sched.add_job(channel.telegram_send_statistics_summary, 'cron', hour='*/9', minute='35')
+sched.add_job(channel.telegram_send_statistics_by_countries, 'cron', hour='*/13', minute='35')
 sched.start()
 
 app = Flask(__name__)
 
 if __name__ == "__main__":
     app.run()
+    channel.telegram_send_advice()
+    # channel.telegram_send_poll()
+    # channel.telegram_send_image()
+    # channel.telegram_send_statistics_summary()
+    # channel.telegram_send_statistics_by_countries()
