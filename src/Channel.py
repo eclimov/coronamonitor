@@ -5,7 +5,6 @@ from telegram.bot import Bot
 from os import listdir
 from os.path import isfile, join
 from telegram import InlineKeyboardMarkup, InlineKeyboardButton
-import env
 
 
 def build_menu(buttons, n_cols, header_buttons=None, footer_buttons=None):
@@ -22,7 +21,7 @@ def format_statistics(cases, deaths, recovered):
 
 
 class Channel:
-    def __init__(self):
+    def __init__(self, chat_id, bot_token):
         self.__advices = [
             'Регулярно обрабатывайте руки спиртосодержащим средством или мойте их с мылом',
             'Держитесь от людей на расстоянии как минимум 1 метра, особенно если у них кашель, насморк и повышенная температура',
@@ -35,8 +34,8 @@ class Channel:
             'Не курите и не употребляйте алкоголь или другие психоактивные вещества, чтобы подавить свои эмоции',
             'Если вас или членов вашей семьи беспокоят и тревожат репортажи в СМИ, уделяйте меньше времени их просмотру или прослушиванию'
         ]
-        self.__chat_id = env.TELEGRAM_CHAT_ID
-        self.__bot = Bot(token=env.TELEGRAM_BOT_TOKEN)
+        self.__chat_id = chat_id
+        self.__bot = Bot(token=bot_token)
 
     def telegram_send_advice(self):
         result = self.__bot.send_message(
