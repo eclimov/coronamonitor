@@ -45,6 +45,13 @@ class Channel:
         )
         print(result)
 
+    def telegram_send_text(self, text):
+        result = self.__bot.send_message(
+            chat_id=self.__chat_id,
+            text=text
+        )
+        print(result)
+
     def telegram_send_image(self):
         images_path = 'assets'  # DO NOT CHANGE THIS PATH ON LINUX(PROD)
         images = [f for f in listdir(images_path) if isfile(join(images_path, f))]
@@ -83,7 +90,7 @@ class Channel:
         if str(r.status_code) == '200':
             response_list = json.loads(r.content.decode("utf-8"))  # Decode byte literal and convert to Json object
             countries_data = [
-                {'name': 'Молдова', 'data': next((item for item in response_list if item["country"] == "Moldova"), None)},
+                {'name': 'Молдова', 'data': next((item for item in response_list if item["country"] == "Moldova, Republic of"), None)},
                 {'name': 'Италия', 'data': next((item for item in response_list if item["country"] == "Italy"), None)},
                 {'name': 'Украина', 'data': next((item for item in response_list if item["country"] == "Ukraine"), None)},
                 {'name': 'Румыния', 'data': next((item for item in response_list if item["country"] == "Romania"), None)},
