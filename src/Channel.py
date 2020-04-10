@@ -89,7 +89,7 @@ class Channel:
         if str(r.status_code) == '200':
             response_list = json.loads(r.content.decode("utf-8"))  # Decode byte literal and convert to Json object
             countries_data = [
-                {'name': 'Молдова', 'data': next((item for item in response_list if item["country"] == "Moldova, Republic of"), None)},
+                {'name': 'Молдова', 'data': next((item for item in response_list if item["country"] == "Moldova"), None)},
                 {'name': 'Италия', 'data': next((item for item in response_list if item["country"] == "Italy"), None)},
                 {'name': 'Украина', 'data': next((item for item in response_list if item["country"] == "Ukraine"), None)},
                 {'name': 'Румыния', 'data': next((item for item in response_list if item["country"] == "Romania"), None)},
