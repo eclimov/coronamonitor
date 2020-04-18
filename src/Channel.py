@@ -16,8 +16,8 @@ def build_menu(buttons, n_cols, header_buttons=None, footer_buttons=None):
     return menu
 
 
-def format_statistics(cases, deaths, recovered):
-    return f'```\nВсего:         {cases:,}\nСмертей:       {deaths:,}\nВыздоровлений: {recovered:,}```'
+def format_statistics(today_cases, cases, deaths, recovered):
+    return f'```\nСегодня:       {today_cases:,}\nВсего:         {cases:,}\nСмертей:       {deaths:,}\nВыздоровлений: {recovered:,}```'
 
 
 class Channel:
@@ -74,18 +74,23 @@ class Channel:
         print(result)
 
     def telegram_send_statistics_summary(self):
-        r = requests.get('https://corona.lmao.ninja/all')
+        endpoint = 'https://corona.lmao.ninja/v2/all'
+        r = requests.get(endpoint)
         if str(r.status_code) == '200':
             response = json.loads(r.content.decode("utf-8"))  # Decode byte literal and convert to Json object
             result = self.__bot.send_message(
                 chat_id=self.__chat_id,
                 parse_mode='Markdown',
-                text=format_statistics(response["cases"], response["deaths"], response["recovered"])
+                text='#StatsOverall\n' + format_statistics(response["todayCases"], response["cases"], response["deaths"], response["recovered"])
             )
             print(result)
+        else:
+            raise Exception(f'{endpoint} => code {r.status_code}')
 
     def telegram_send_statistics_by_countries(self):
-        r = requests.get('https://corona.lmao.ninja/countries')
+        # TODO: use yestarday's data (https://corona.lmao.ninja/v2/countries/Moldova?yesterday=true) and compare 'todayCases' values
+        endpoint = 'https://corona.lmao.ninja/v2/countries'
+        r = requests.get(endpoint)
         if str(r.status_code) == '200':
             response_list = json.loads(r.content.decode("utf-8"))  # Decode byte literal and convert to Json object
             countries_data = [
@@ -100,16 +105,18 @@ class Channel:
             cases_country_least = response_list_sorted_by_cases[0]
             cases_country_most = response_list_sorted_by_cases[len(response_list_sorted_by_cases) - 1]
 
-            countries_data_formatted_list = [f'*{country_data["name"]}*\n{format_statistics(country_data["data"]["cases"], country_data["data"]["deaths"], country_data["data"]["recovered"])}' for country_data in countries_data]
+            countries_data_formatted_list = [f'*{country_data["name"]}*\n{format_statistics(country_data["data"]["todayCases"], country_data["data"]["cases"], country_data["data"]["deaths"], country_data["data"]["recovered"])}' for country_data in countries_data]
             countries_data_formatted_list.append(
                 f'Минимум случаев: {cases_country_least["country"]} - {cases_country_least["cases"]}\nМаксимум случаев: {cases_country_most["country"]} - {cases_country_most["cases"]}'
             )
             result = self.__bot.send_message(
                 chat_id=self.__chat_id,
                 parse_mode='Markdown',
-                text='\n\n'.join(countries_data_formatted_list)
+                text='#StatsByCountry\n' + '\n\n'.join(countries_data_formatted_list)
             )
             print(result)
+        else:
+            raise Exception(f'{endpoint} => code {r.status_code}')
 
     # TODO: def telegram_send_news(self):
 
