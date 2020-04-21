@@ -21,11 +21,11 @@ def listener_scheduler_error(event: JobExecutionEvent):
     channelDebug.telegram_send_text(f'ERROR\n{str(event.exception)}\n{event.traceback}')
 
 
-sched.add_job(channel.telegram_send_statistics_by_countries, 'cron', hour='18', minute='55')
+sched.add_job(channel.telegram_send_statistics_by_countries, 'cron', hour='17', minute='55')
 sched.add_job(channel.telegram_send_statistics_summary, 'cron', hour='10', minute='35')
 sched.add_job(channel.telegram_send_image, 'cron', hour='8', minute='32')
 # sched.add_job(channel.telegram_send_advice, 'cron', hour='10,17', minute='1')
-sched.add_job(channel.telegram_send_poll, 'cron', hour='15', minute='25')
+# sched.add_job(channel.telegram_send_poll, 'cron', hour='15', minute='25')
 
 sched.add_listener(listener_scheduler_error, EVENT_JOB_ERROR)
 sched.start()

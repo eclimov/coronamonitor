@@ -16,8 +16,9 @@ def build_menu(buttons, n_cols, header_buttons=None, footer_buttons=None):
     return menu
 
 
-def format_statistics(today_cases, cases, deaths, recovered):
-    return f'```\nСегодня:       {today_cases:,}\nВсего:         {cases:,}\nСмертей:       {deaths:,}\nВыздоровлений: {recovered:,}```'
+def format_statistics(yesterday_cases, today_cases, cases, deaths, recovered):
+    trend_emoji = u'\U00002197' if today_cases > yesterday_cases else u'\U00002198'
+    return f'```\nСегодня:       {today_cases:,} {trend_emoji}\nВсего:         {cases:,}\nСмертей:       {deaths:,}\nВыздоровлений: {recovered:,}```'
 
 
 class Channel:
@@ -74,49 +75,85 @@ class Channel:
         print(result)
 
     def telegram_send_statistics_summary(self):
-        endpoint = 'https://corona.lmao.ninja/v2/all'
-        r = requests.get(endpoint)
-        if str(r.status_code) == '200':
-            response = json.loads(r.content.decode("utf-8"))  # Decode byte literal and convert to Json object
-            result = self.__bot.send_message(
-                chat_id=self.__chat_id,
-                parse_mode='Markdown',
-                text='#StatsOverall\n' + format_statistics(response["todayCases"], response["cases"], response["deaths"], response["recovered"])
-            )
-            print(result)
-        else:
-            raise Exception(f'{endpoint} => code {r.status_code}')
+        endpoint_yesterday = 'https://corona.lmao.ninja/v2/all?yesterday=true'
+        r_yesterday = requests.get(endpoint_yesterday)
+        if str(r_yesterday.status_code) != '200':
+            raise Exception(f'{endpoint_yesterday} => code {r_yesterday.status_code}')
+
+        endpoint_today = 'https://corona.lmao.ninja/v2/all'
+        r_today = requests.get(endpoint_today)
+        if str(r_today.status_code) != '200':
+            raise Exception(f'{endpoint_today} => code {r_today.status_code}')
+
+        # Decode byte literal and convert to Json object
+        response_yesterday = json.loads(r_yesterday.content.decode("utf-8"))
+        response_today = json.loads(r_today.content.decode("utf-8"))
+
+        # https://apps.timwhitlock.info/emoji/tables/unicode
+        result = self.__bot.send_message(
+            chat_id=self.__chat_id,
+            parse_mode='Markdown',
+            text='#StatsOverall\n' + format_statistics(response_yesterday["todayCases"], response_today["todayCases"], response_today["cases"], response_today["deaths"], response_today["recovered"])
+        )
+        print(result)
 
     def telegram_send_statistics_by_countries(self):
-        # TODO: use yestarday's data (https://corona.lmao.ninja/v2/countries/Moldova?yesterday=true) and compare 'todayCases' values
-        endpoint = 'https://corona.lmao.ninja/v2/countries'
-        r = requests.get(endpoint)
-        if str(r.status_code) == '200':
-            response_list = json.loads(r.content.decode("utf-8"))  # Decode byte literal and convert to Json object
-            countries_data = [
-                {'name': 'Молдова', 'data': next((item for item in response_list if item["country"] == "Moldova"), None)},
-                {'name': 'Италия', 'data': next((item for item in response_list if item["country"] == "Italy"), None)},
-                {'name': 'Украина', 'data': next((item for item in response_list if item["country"] == "Ukraine"), None)},
-                {'name': 'Румыния', 'data': next((item for item in response_list if item["country"] == "Romania"), None)},
-                {'name': 'Россия', 'data': next((item for item in response_list if item["country"] == "Russia"), None)}
-            ]
+        endpoint_yesterday = 'https://corona.lmao.ninja/v2/countries/?yesterday=true'
+        r_yesterday = requests.get(endpoint_yesterday)
+        if str(r_yesterday.status_code) != '200':
+            raise Exception(f'{endpoint_yesterday} => code {r_yesterday.status_code}')
 
-            response_list_sorted_by_cases = sorted(response_list, key=lambda k: k['cases'])
-            cases_country_least = response_list_sorted_by_cases[0]
-            cases_country_most = response_list_sorted_by_cases[len(response_list_sorted_by_cases) - 1]
+        endpoint_today = 'https://corona.lmao.ninja/v2/countries'
+        r_today = requests.get(endpoint_today)
+        if str(r_today.status_code) != '200':
+            raise Exception(f'{endpoint_today} => code {r_today.status_code}')
 
-            countries_data_formatted_list = [f'*{country_data["name"]}*\n{format_statistics(country_data["data"]["todayCases"], country_data["data"]["cases"], country_data["data"]["deaths"], country_data["data"]["recovered"])}' for country_data in countries_data]
-            countries_data_formatted_list.append(
-                f'Минимум случаев: {cases_country_least["country"]} - {cases_country_least["cases"]}\nМаксимум случаев: {cases_country_most["country"]} - {cases_country_most["cases"]}'
-            )
-            result = self.__bot.send_message(
-                chat_id=self.__chat_id,
-                parse_mode='Markdown',
-                text='#StatsByCountry\n' + '\n\n'.join(countries_data_formatted_list)
-            )
-            print(result)
-        else:
-            raise Exception(f'{endpoint} => code {r.status_code}')
+        # Decode byte literal and convert to Json object
+        response_list_yesterday = json.loads(r_yesterday.content.decode("utf-8"))
+        response_list_today = json.loads(r_today.content.decode("utf-8"))
+
+        countries_data = [
+            {
+                'name': 'Молдова',
+                'data_yesterday': next((item for item in response_list_yesterday if item["country"] == "Moldova"), None),
+                'data_today': next((item for item in response_list_today if item["country"] == "Moldova"), None)
+            },
+            {
+                'name': 'Италия',
+                'data_yesterday': next((item for item in response_list_yesterday if item["country"] == "Italy"), None),
+                'data_today': next((item for item in response_list_today if item["country"] == "Italy"), None)
+            },
+            {
+                'name': 'Украина',
+                'data_yesterday': next((item for item in response_list_yesterday if item["country"] == "Ukraine"), None),
+                'data_today': next((item for item in response_list_today if item["country"] == "Ukraine"), None)
+            },
+            {
+                'name': 'Румыния',
+                'data_yesterday': next((item for item in response_list_yesterday if item["country"] == "Romania"), None),
+                'data_today': next((item for item in response_list_today if item["country"] == "Romania"), None)
+            },
+            {
+                'name': 'Россия',
+                'data_yesterday': next((item for item in response_list_yesterday if item["country"] == "Russia"), None),
+                'data_today': next((item for item in response_list_today if item["country"] == "Russia"), None)
+            }
+        ]
+
+        response_list_sorted_by_cases = sorted(response_list_today, key=lambda k: k['cases'])
+        cases_country_least = response_list_sorted_by_cases[0]
+        cases_country_most = response_list_sorted_by_cases[len(response_list_sorted_by_cases) - 1]
+
+        countries_data_formatted_list = [f'*{country_data["name"]}*\n{format_statistics(country_data["data_yesterday"]["todayCases"], country_data["data_today"]["todayCases"], country_data["data_today"]["cases"], country_data["data_today"]["deaths"], country_data["data_today"]["recovered"])}' for country_data in countries_data]
+        countries_data_formatted_list.append(
+            f'Минимум случаев: {cases_country_least["country"]} - {cases_country_least["cases"]}\nМаксимум случаев: {cases_country_most["country"]} - {cases_country_most["cases"]}'
+        )
+        result = self.__bot.send_message(
+            chat_id=self.__chat_id,
+            parse_mode='Markdown',
+            text='#StatsByCountry\n' + '\n\n'.join(countries_data_formatted_list)
+        )
+        print(result)
 
     # TODO: def telegram_send_news(self):
 
