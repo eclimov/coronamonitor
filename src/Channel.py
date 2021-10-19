@@ -75,12 +75,12 @@ class Channel:
         print(result)
 
     def telegram_send_statistics_summary(self):
-        endpoint_yesterday = 'https://corona.lmao.ninja/v2/all?yesterday=true'
+        endpoint_yesterday = 'https://disease.sh/v3/covid-19/all?yesterday=true'
         r_yesterday = requests.get(endpoint_yesterday)
         if str(r_yesterday.status_code) != '200':
             raise Exception(f'{endpoint_yesterday} => code {r_yesterday.status_code}')
 
-        endpoint_today = 'https://corona.lmao.ninja/v2/all'
+        endpoint_today = 'https://disease.sh/v3/covid-19/all'
         r_today = requests.get(endpoint_today)
         if str(r_today.status_code) != '200':
             raise Exception(f'{endpoint_today} => code {r_today.status_code}')
@@ -98,12 +98,12 @@ class Channel:
         print(result)
 
     def telegram_send_statistics_by_countries(self):
-        endpoint_yesterday = 'https://corona.lmao.ninja/v2/countries/?yesterday=true'
+        endpoint_yesterday = 'https://disease.sh/v3/covid-19/countries/?yesterday=true'
         r_yesterday = requests.get(endpoint_yesterday)
         if str(r_yesterday.status_code) != '200':
             raise Exception(f'{endpoint_yesterday} => code {r_yesterday.status_code}')
 
-        endpoint_today = 'https://corona.lmao.ninja/v2/countries'
+        endpoint_today = 'https://disease.sh/v3/covid-19/countries'
         r_today = requests.get(endpoint_today)
         if str(r_today.status_code) != '200':
             raise Exception(f'{endpoint_today} => code {r_today.status_code}')

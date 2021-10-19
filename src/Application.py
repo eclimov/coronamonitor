@@ -23,7 +23,7 @@ def listener_scheduler_error(event: JobExecutionEvent):
 
 sched.add_job(channel.telegram_send_statistics_by_countries, 'cron', hour='17', minute='10')
 sched.add_job(channel.telegram_send_statistics_summary, 'cron', hour='10', minute='35')
-sched.add_job(channel.telegram_send_image, 'cron', hour='7', minute='32')
+sched.add_job(channel.telegram_send_image, 'cron', day='*/2', hour='7', minute='32')
 # sched.add_job(channel.telegram_send_advice, 'cron', hour='10,17', minute='1')
 # sched.add_job(channel.telegram_send_poll, 'cron', hour='15', minute='25')
 
